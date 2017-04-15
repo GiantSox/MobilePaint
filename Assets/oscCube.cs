@@ -16,11 +16,15 @@ public class oscCube : MonoBehaviour
     Vector3 head;
     Vector3 leftHand;
     Vector3 rightHand;
+    public GameObject controller;
 
     void Start()
     {
         oscin = new OSCServer(12345);
         Debug.Log("osc server started");
+
+
+        //controller = GameObject.FindGameObjectWithTag("daydreampos");
         //thread = new Thread(new ThreadStart(UpdateOSC));
         //thread.Start();
     }
@@ -65,20 +69,22 @@ public class oscCube : MonoBehaviour
         {
             head.x = (float)msg.Data[0];
             head.y = (float)msg.Data[1];
-            //head.z = (float)msg.Data[2];
-        }/*
+            head.z = (float)msg.Data[2];
+        }
         else if (msg.Address == "/leftHand/")
         {
             leftHand.x = (float)msg.Data[0];
             leftHand.y = (float)msg.Data[1];
-            //leftHand.z = (float)msg.Data[2];
+            leftHand.z = (float)msg.Data[2];
         }
         else if (msg.Address == "/rightHand/")
         {
             rightHand.x = (float)msg.Data[0];
             rightHand.y = (float)msg.Data[1];
-            //rightHand.z = (float)msg.Data[2];
-        }*/
+            rightHand.z = (float)msg.Data[2];
+
+            controller.transform.position = rightHand;
+        }
     }
 
     void Update()
@@ -87,6 +93,11 @@ public class oscCube : MonoBehaviour
         if(message != null)
         {
             parseMessage(message);
+        }
+        OSCPacket messag = oscin.LastReceivedPacket;
+        if (messag != null)
+        {
+            parseMessage(messag);
         }
         transform.position = head;
 
