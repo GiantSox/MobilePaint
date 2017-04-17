@@ -16,7 +16,7 @@ public class oscCube : MonoBehaviour
     Vector3 head;
     Vector3 leftHand;
     Vector3 rightHand;
-    public GameObject controller;
+    //public GameObject controller;
 
     void Start()
     {
@@ -25,25 +25,32 @@ public class oscCube : MonoBehaviour
 
 
         //controller = GameObject.FindGameObjectWithTag("daydreampos");
-        //thread = new Thread(new ThreadStart(UpdateOSC));
-        //thread.Start();
+        thread = new Thread(new ThreadStart(UpdateOSC));
+        thread.Start();
     }
 
     void OnApplicationQuit()
     {
         oscin.Close();
-        /*thread.Interrupt();
+        thread.Interrupt();
         if (!thread.Join(2000))
         {
             thread.Abort();
-        }*/
+        }
     }
 
-    /*void UpdateOSC()
+    void UpdateOSC()
     {
         while (true)
         {
-            OSCPacket msg = oscin.LastReceivedPacket;
+            
+            OSCPacket message = oscin.LastReceivedPacket;
+            if(message != null)
+            {
+                parseMessage(message);
+            }
+
+            /*OSCPacket msg = oscin.LastReceivedPacket;
             if (msg != null)
             {
                 if (msg.IsBundle())
@@ -57,10 +64,10 @@ public class oscCube : MonoBehaviour
                 else {
                     parseMessage(msg);
                 }
-            }
-            //Thread.Sleep(5);
+            }*/
+            Thread.Sleep(5);
         }
-    }*/
+    }
 
     void parseMessage(OSCPacket msg)
     {
@@ -69,7 +76,7 @@ public class oscCube : MonoBehaviour
         {
             head.x = (float)msg.Data[0];
             head.y = (float)msg.Data[1];
-            head.z = (float)msg.Data[2];
+            head.z = 0-(float)msg.Data[2];
         }
         else if (msg.Address == "/leftHand/")
         {
@@ -82,14 +89,12 @@ public class oscCube : MonoBehaviour
             rightHand.x = (float)msg.Data[0];
             rightHand.y = (float)msg.Data[1];
             rightHand.z = (float)msg.Data[2];
-
-            controller.transform.position = rightHand;
         }
     }
 
     void Update()
     {
-        OSCPacket message = oscin.LastReceivedPacket;
+        /*OSCPacket message = oscin.LastReceivedPacket;
         if(message != null)
         {
             parseMessage(message);
@@ -98,8 +103,9 @@ public class oscCube : MonoBehaviour
         if (messag != null)
         {
             parseMessage(messag);
-        }
+        }*/
         transform.position = head;
+        //controller.transform.position = rightHand;
 
     }
 }
