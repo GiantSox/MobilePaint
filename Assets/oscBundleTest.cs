@@ -11,25 +11,25 @@ using UnityOSC;
 public class oscBundleTest : MonoBehaviour {
 
     
-    private Thread thread;
+    //private Thread thread;
     private OSCServer oscin;
 
 
     void Start()
     {
         oscin = new OSCServer( 31337 );
-        thread = new Thread(new ThreadStart(UpdateOSC));
-        thread.Start();
+        /*thread = new Thread(new ThreadStart(UpdateOSC));
+        thread.Start();*/
     }
 
     void OnApplicationQuit()
     {
         oscin.Close();
-        thread.Interrupt();
+        /*thread.Interrupt();
         if (!thread.Join(2000))
         {
             thread.Abort();
-        }
+        }*/
     }
 
     void UpdateOSC()
@@ -39,8 +39,10 @@ public class oscBundleTest : MonoBehaviour {
             OSCPacket msg = oscin.LastReceivedPacket;
             if (msg != null)
             {
+                Debug.Log("new osc message");
                 if (msg.IsBundle())
                 {
+                    Debug.Log("new osc bundle");
                     OSCBundle b = (OSCBundle)msg;
                     foreach (OSCPacket subm in b.Data)
                     {
@@ -51,7 +53,7 @@ public class oscBundleTest : MonoBehaviour {
                     parseMessage(msg);
                 }
             }
-            Thread.Sleep(5);
+            //Thread.Sleep(5);
         }
     }
 
@@ -64,5 +66,21 @@ public class oscBundleTest : MonoBehaviour {
 
     void Update()
     {
+        OSCPacket msg = oscin.LastReceivedPacket;
+        if(msg != null)
+        {
+            parseMessage(msg);
+            /*Debug.Log("message received");
+            if(msg.IsBundle())
+            {
+                Debug.Log("bundle received");
+                //OSCBundle bundle = (OSCBundle)msg;
+            }
+            else
+            {
+                parseMessage(msg);
+            }*/
+           
+        }
     }
 }

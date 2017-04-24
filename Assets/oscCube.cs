@@ -10,47 +10,37 @@ using UnityOSC;
 
 public class oscCube : MonoBehaviour
 {
+    public int oscPort = 12345;
 
     private Thread thread;
     private OSCServer oscin;
     Vector3 head;
     Vector3 leftHand;
     Vector3 rightHand;
-    //public GameObject controller;
 
     void Start()
     {
-        oscin = new OSCServer(12345);
-        Debug.Log("osc server started");
-
-
-        //controller = GameObject.FindGameObjectWithTag("daydreampos");
-        thread = new Thread(new ThreadStart(UpdateOSC));
-        thread.Start();
+        oscin = new OSCServer(oscPort);
+        Debug.Log("osc server started on port " + oscPort);
+        //thread = new Thread(new ThreadStart(UpdateOSC));
+        //thread.Start();
     }
 
     void OnApplicationQuit()
     {
         oscin.Close();
-        thread.Interrupt();
+        /*thread.Interrupt();
         if (!thread.Join(2000))
         {
             thread.Abort();
-        }
+        }*/
     }
 
-    void UpdateOSC()
+    /*void UpdateOSC()
     {
         while (true)
         {
-            
-            OSCPacket message = oscin.LastReceivedPacket;
-            if(message != null)
-            {
-                parseMessage(message);
-            }
-
-            /*OSCPacket msg = oscin.LastReceivedPacket;
+            OSCPacket msg = oscin.LastReceivedPacket;
             if (msg != null)
             {
                 if (msg.IsBundle())
@@ -64,10 +54,10 @@ public class oscCube : MonoBehaviour
                 else {
                     parseMessage(msg);
                 }
-            }*/
-            Thread.Sleep(5);
+            }
+            //Thread.Sleep(5);
         }
-    }
+    }*/
 
     void parseMessage(OSCPacket msg)
     {
@@ -76,36 +66,30 @@ public class oscCube : MonoBehaviour
         {
             head.x = (float)msg.Data[0];
             head.y = (float)msg.Data[1];
-            head.z = 0-(float)msg.Data[2];
-        }
+            //head.z = (float)msg.Data[2];
+        }/*
         else if (msg.Address == "/leftHand/")
         {
             leftHand.x = (float)msg.Data[0];
             leftHand.y = (float)msg.Data[1];
-            leftHand.z = (float)msg.Data[2];
+            //leftHand.z = (float)msg.Data[2];
         }
         else if (msg.Address == "/rightHand/")
         {
             rightHand.x = (float)msg.Data[0];
             rightHand.y = (float)msg.Data[1];
-            rightHand.z = (float)msg.Data[2];
-        }
+            //rightHand.z = (float)msg.Data[2];
+        }*/
     }
 
     void Update()
     {
-        /*OSCPacket message = oscin.LastReceivedPacket;
-        if(message != null)
+        OSCPacket message = oscin.LastReceivedPacket;
+        if (message != null)
         {
             parseMessage(message);
         }
-        OSCPacket messag = oscin.LastReceivedPacket;
-        if (messag != null)
-        {
-            parseMessage(messag);
-        }*/
         transform.position = head;
-        //controller.transform.position = rightHand;
 
     }
 }
