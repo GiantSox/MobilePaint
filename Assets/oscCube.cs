@@ -61,13 +61,29 @@ public class oscCube : MonoBehaviour
 
     void parseMessage(OSCPacket msg)
     {
-        Debug.Log("message with address: " + msg.Address + " and value: " + msg.Data[0]);
+        //Debug.Log("message with address: " + msg.Address + " and value: " + msg.Data[0]);
         if (msg.Address == "/head/")
         {
             head.x = (float)msg.Data[0];
             head.y = (float)msg.Data[1];
             //head.z = (float)msg.Data[2];
-        }/*
+        }
+        if(msg.IsBundle())
+        {
+            OSCBundle bundle = (OSCBundle)msg;
+            foreach (OSCPacket submessage in bundle.Data)
+            {
+                Debug.Log("bundled message with address " + submessage.Address + " and value " + submessage.Data[0]);
+                /*switch(submessage.Address)
+                {
+                    case: "
+                            "
+                }*/
+            }
+            
+            //Debug.Log(msg.Address);
+        }
+        /*
         else if (msg.Address == "/leftHand/")
         {
             leftHand.x = (float)msg.Data[0];
@@ -88,6 +104,10 @@ public class oscCube : MonoBehaviour
         if (message != null)
         {
             parseMessage(message);
+            if(message.IsBundle())
+            {
+                Debug.Log("Message In Bundle!");
+            }
         }
         transform.position = head;
 
