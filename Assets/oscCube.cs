@@ -58,44 +58,42 @@ public class oscCube : MonoBehaviour
             //Thread.Sleep(5);
         }
     }*/
+    void parseBundle(OSCPacket msg)
+    {
+        if (!msg.IsBundle())
+        {
+            Debug.Assert(msg.IsBundle(), "parseBundle is only used for parsing bundles!");
+        }
+        OSCBundle bundle = (OSCBundle)msg;
+        foreach (OSCPacket submessage in bundle.Data)
+        {
+            Debug.Log("bundled message with address " + submessage.Address + " and value " + submessage.Data[0]);
+            parseMessage(submessage);
+
+        }
+    }
+
 
     void parseMessage(OSCPacket msg)
     {
+        if (msg.IsBundle())
+        {
+            Debug.Assert(!msg.IsBundle(), "Use parseBundle() to parse bundles!");
+        }
+
         //Debug.Log("message with address: " + msg.Address + " and value: " + msg.Data[0]);
-        if (msg.Address == "/head/")
+        switch (msg.Address)
         {
-            head.x = (float)msg.Data[0];
-            head.y = (float)msg.Data[1];
-            //head.z = (float)msg.Data[2];
+            case "/head/":  //case not case:
+                head.x = (float)msg.Data[0];
+                head.y = (float)msg.Data[1];
+                head.z = (float)msg.Data[2];
+                break;
+            case "/leftHand/":
+                break;
+            case "/rightHand/":
+                break;
         }
-        if(msg.IsBundle())
-        {
-            OSCBundle bundle = (OSCBundle)msg;
-            foreach (OSCPacket submessage in bundle.Data)
-            {
-                Debug.Log("bundled message with address " + submessage.Address + " and value " + submessage.Data[0]);
-                /*switch(submessage.Address)
-                {
-                    case: "
-                            "
-                }*/
-            }
-            
-            //Debug.Log(msg.Address);
-        }
-        /*
-        else if (msg.Address == "/leftHand/")
-        {
-            leftHand.x = (float)msg.Data[0];
-            leftHand.y = (float)msg.Data[1];
-            //leftHand.z = (float)msg.Data[2];
-        }
-        else if (msg.Address == "/rightHand/")
-        {
-            rightHand.x = (float)msg.Data[0];
-            rightHand.y = (float)msg.Data[1];
-            //rightHand.z = (float)msg.Data[2];
-        }*/
     }
 
     void Update()
@@ -103,10 +101,13 @@ public class oscCube : MonoBehaviour
         OSCPacket message = oscin.LastReceivedPacket;
         if (message != null)
         {
-            parseMessage(message);
             if(message.IsBundle())
+            {       
+                parseBundle(message);
+            }
+            else
             {
-                Debug.Log("Message In Bundle!");
+                parseMessage(message);
             }
         }
         transform.position = head;
