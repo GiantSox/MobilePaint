@@ -12,7 +12,9 @@ public class oscCube : MonoBehaviour
 {
     public int oscPort = 12345;
 
-    private Thread thread;
+    public GameObject hand;
+    public bool EditorOnlyLeftyMode = false;
+    
     private OSCServer oscin;
     Vector3 head;
     Vector3 leftHand;
@@ -22,64 +24,65 @@ public class oscCube : MonoBehaviour
     {
         oscin = new OSCServer(oscPort);
         Debug.Log("osc server started on port " + oscPort);
-        //thread = new Thread(new ThreadStart(UpdateOSC));
-        //thread.Start();
     }
 
     void OnApplicationQuit()
     {
         oscin.Close();
-        /*thread.Interrupt();
-        if (!thread.Join(2000))
-        {
-            thread.Abort();
-        }*/
     }
 
-    /*void UpdateOSC()
+    GvrSettings.UserPrefsHandedness getHandedness()
     {
-        while (true)
+        if(EditorOnlyLeftyMode)
         {
-            OSCPacket msg = oscin.LastReceivedPacket;
-            if (msg != null)
-            {
-                if (msg.IsBundle())
-                {
-                    OSCBundle b = (OSCBundle)msg;
-                    foreach (OSCPacket subm in b.Values)
-                    {
-                        parseMessage(subm);
-                    }
-                }
-                else {
-                    parseMessage(msg);
-                }
-            }
-            //Thread.Sleep(5);
+            return GvrSettings.UserPrefsHandedness.Left;
         }
-    }*/
+        else
+        {
+            return GvrSettings.Handedness;
+        }
+    }
+
+    void parsePacket()
+    {
+        OSCPacket message = oscin.LastReceivedPacket;
+        if (message != null)
+        {
+            if (message.IsBundle())
+            {
+                parseBundle(message);
+            }
+            else
+            {
+                parseMessage(message);
+            }
+        }
+    }
+
     void parseBundle(OSCPacket msg)
     {
+        #region Non-Bundle Assert
         if (!msg.IsBundle())
         {
             Debug.Assert(msg.IsBundle(), "parseBundle is only used for parsing bundles!");
         }
+        #endregion
         OSCBundle bundle = (OSCBundle)msg;
         foreach (OSCPacket submessage in bundle.Data)
         {
-            Debug.Log("bundled message with address " + submessage.Address + " and value " + submessage.Data[0]);
             parseMessage(submessage);
 
         }
     }
 
-
     void parseMessage(OSCPacket msg)
     {
+        #region Bundle Assert
         if (msg.IsBundle())
         {
             Debug.Assert(!msg.IsBundle(), "Use parseBundle() to parse bundles!");
         }
+        #endregion
 
         //Debug.Log("message with address: " + msg.Address + " and value: " + msg.Data[0]);
         switch (msg.Address)
@@ -90,27 +93,34 @@ public class oscCube : MonoBehaviour
                 head.z = (float)msg.Data[2];
                 break;
             case "/leftHand/":
+                leftHand.x = (float)msg.Data[0];
+                leftHand.y = (float)msg.Data[1];
+                leftHand.z = (float)msg.Data[2];
                 break;
             case "/rightHand/":
+                rightHand.x = (float)msg.Data[0];
+                rightHand.y = (float)msg.Data[1];
+                rightHand.z = (float)msg.Data[2];
                 break;
         }
     }
 
     void Update()
     {
-        OSCPacket message = oscin.LastReceivedPacket;
-        if (message != null)
-        {
-            if(message.IsBundle())
-            {       
-                parseBundle(message);
-            }
-            else
-            {
-                parseMessage(message);
-            }
-        }
-        transform.position = head;
+        parsePacket();
 
+        //head.z = head.z * -1;
+        head.z = 0 - head.z;
+        transform.position = head;
+        if(getHandedness() == GvrSettings.UserPrefsHandedness.Left)
+        {
+            leftHand.z = 0 - leftHand.z;
+            hand.gameObject.transform.position = leftHand;
+        }
+        else
+        {
+            rightHand.z = 0 - rightHand.z;
+            hand.gameObject.transform.position = rightHand;
+        }
     }
 }
